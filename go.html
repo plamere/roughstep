@@ -107,6 +107,19 @@ var isPlaying;
 
 var dogQueue = [];
 
+var curScale = null;
+var scales = { }
+var oneShots = { }
+
+function sqk(key) {
+    var idx = parseInt(key, 16)
+    return sqk(idx);
+}
+
+function sqi(idx) {
+    return curScale.quanta[idx];
+}
+
 function buildSongFromAnalysis(track) {
     var segments = track.analysis.segments;
     for (var i = 0; i < segments.length; i++) {
@@ -118,11 +131,26 @@ function buildSongFromAnalysis(track) {
         //console.log('beat', beat);
         dogPost(beat.start, yip);
     });
+
+    var grunt = oneShots['g'];
+    _.each(track.analysis.bars, function(bar, i) {
+        //console.log('beat', beat);
+        //dogPost(bar.start, grunt);
+    });
+
+    _.each(track.analysis.bars, function(tatum, i) {
+        //console.log('beat', beat);
+        dogPost(tatum.start, sqi(tatum.which %12));
+    });
+
+    dogQueue.sort(function(a,b) {
+        return a.time - b.time;
+    });
 }
 
 
 function dogPost(startTime, q) {
-    var mq = { time:startTime, q:q};
+    var mq = { time:startTime + q.sound.offset, q:q};
     dogQueue.push(mq);
 }
 
@@ -260,10 +288,27 @@ function urldecode(str) {
 
 function loadScaleSample(sound, buffer) {
     // console.log('   ', sound, buffer);
+    var start = 0;
+    var quanta = [];
+    for (var i = 0; i < sound.notes; i++) {
+        var newQ = {
+            start:start + sound.offset,
+            duration: sound.length - sound.offset,
+            track: {
+                buffer:buffer,
+            },
+            sound:sound,
+        };
+        quanta.push(newQ);
+        start += sound.length;
+    }
+    scales[sound.name] = {
+        quanta:quanta,
+        sound:sound
+    }
+    curScale = scales['woof']; // its the bark scale
 }
 
-var oneShots = {
-}
 
 function loadSampleLibrary() {
     _.each(soundLibrary, function(sound) {
@@ -284,7 +329,8 @@ function loadSampleLibrary() {
                         duration: buffer.duration,
                         track: {
                             buffer:buffer,
-                        }
+                        },
+                        sound:sound,
                     };
                     if (sound.key in oneShots) {
                         console.log("Conflicting oneshots for",sound.key);

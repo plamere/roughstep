@@ -104,6 +104,7 @@ var soundLibrary = [
         file:'monster-trimmed.wav',
         description: 'monster snarl',
         key:'m',
+        offset:0
     },
     {
         name: 'monster-reverb',
@@ -111,6 +112,7 @@ var soundLibrary = [
         file:'monster-reverb.wav',
         description: 'monster snarl with reverb',
         key:'M',
+        offset:0
     },
     {
         name: 'rsnarl',
@@ -118,6 +120,7 @@ var soundLibrary = [
         file:'snarl-reversed.wav',
         description: 'snarl with reverb',
         key:'S',
+        offset:0
     },
     {
         name: 'snarl',
@@ -125,6 +128,7 @@ var soundLibrary = [
         file:'snarl.wav',
         description: 'snarl',
         key:'s',
+        offset:0
     },
     {
         name: 'yip',
@@ -132,6 +136,7 @@ var soundLibrary = [
         file:'sophie-trim.wav',
         description: 'single yippy dog bark',
         key:'y',
+        offset:0
     },
     {
         name: 'whine',
@@ -139,6 +144,7 @@ var soundLibrary = [
         file:'whine-trimmed.wav',
         description: 'dog whine',
         key:'w',
+        offset:0
     },
     {
         name: 'whine-stretched',
@@ -146,6 +152,7 @@ var soundLibrary = [
         file:'whine-stretched.wav',
         description: '10 seconds of scary dog whine',
         key:'W',
+        offset:0
     },
     {
         name: 'grunt',
@@ -153,6 +160,7 @@ var soundLibrary = [
         file:'grunt-trimmed.wav',
         description: 'single short dog grunt',
         key:'g',
+        offset: -0.14
     },
     {
         name: 'ghost-howl',
@@ -160,6 +168,7 @@ var soundLibrary = [
         file:'howl.wav',
         description: '8 second, ghostly howl',
         key:'h',
+        offset:0
     },
 
     {
@@ -168,6 +177,7 @@ var soundLibrary = [
         file:'big_howl.wav',
         description: '8 second, classic wolf howl',
         key:'H',
+        offset:0
     },
 
     {
@@ -176,6 +186,7 @@ var soundLibrary = [
         file:'woof-trimmed.wav',
         description: '2 second, woof-howl',
         key:'j',
+        offset:0
     },
     {
         name: 'woof-alien',
@@ -183,6 +194,7 @@ var soundLibrary = [
         file:'woof-alien.wav',
         description: '2 second, woof-howl',
         key:'J',
+        offset:0
     },
     {
         name: 'woof-cosmic',
@@ -190,6 +202,7 @@ var soundLibrary = [
         file:'woof-cosmic.wav',
         description: '2 second, woof-howl',
         key:'k',
+        offset:0
     },
     {
         name: 'woof-droid',
@@ -197,6 +210,7 @@ var soundLibrary = [
         file:'woof-droid.wav',
         description: '2 second, woof-howl',
         key:'K',
+        offset:0
     },
 
     {
@@ -204,6 +218,7 @@ var soundLibrary = [
         type: 'oneshot',
         file:'chains-trimmed.wav',
         description: 'dog chain',
-        key:'!'
+        key:'!',
+        offset:0
     },
 ];

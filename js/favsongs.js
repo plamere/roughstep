@@ -1,32 +1,20 @@
 var favSongs = [
     {
-        "artist": "Radiohead", 
-        "id": "TRTONCV13AF133BAFD", 
-        "title": "Karma Police", 
+        "artist": "AWOLNATION", 
+        "id": "TRWHQOK13B357AB74A", 
+        "title": "Sail", 
         "visits": 62
     }, 
     {
-        "artist": "Led Zeppelin", 
-        "id": "TROGZSS13B1620ACE6", 
-        "title": "Stairway to Heaven", 
-        "visits": 25
-    }, 
-    {
-        "artist": "Queen", 
-        "id": "TRJONKE13B53CAF5C9", 
-        "title": "Bohemian Rhapsody", 
-        "visits": 62
-    }, 
-    {
-        "artist": "Postal Service", 
-        "id": "TRBXFDO13B52FCCD0B", 
-        "title": "Such Great Heights", 
+        "artist": "Daft Punk", 
+        "id": "TRZKXTL13B5505133D", 
+        "title": "Harder, better, faster, stronger", 
         "visits": 110
     }, 
     {
-        "artist": "Adele", 
-        "id": "TRABQNY13B54571A25", 
-        "title": "Skyfall", 
+        "artist": "Muse", 
+        "id": "TRHIUST13B5695A3E4", 
+        "title": "Madness", 
         "visits": 62
     }, 
     {
@@ -36,16 +24,22 @@ var favSongs = [
         "visits": 29
     }, 
     {
-        "artist": "Toto", 
-        "id": "TRYUEJJ13B1D59CF50", 
-        "title": "Africa", 
+        "artist": "Daft Punk", 
+        "id": "TRSRSLI13451D2B044", 
+        "title": "Around The World", 
         "visits": 29
     }, 
     {
-        "artist": "Mumford & Sons", 
-        "id": "TRBCYZN13B1305D467", 
-        "title": "The Cave",
+        "artist": "Skrillex", 
+        "id": "TRPNLNS13991BF1FBC", 
+        "title": "Bangarang (feat. Sirah)", 
         "visits": 26
+    }, 
+    {
+        "artist": "Skrillex", 
+        "id": "TRECVNM13B542388C0", 
+        "title": "Scary Monsters and Nice Sprites", 
+        "visits": 25
     }, 
     {
         "artist": "The Postal Service", 
@@ -54,9 +48,9 @@ var favSongs = [
         "visits": 23
     }, 
     {
-        "artist": "Flo Rida", 
-        "id": "TRINDKI1405D2CEF8F", 
-        "title": "Whistle", 
+        "artist": "Hans Zimmer", 
+        "id": "TRUTVSC13B550C9BCA", 
+        "title": "Time", 
         "visits": 22
     } 
 ]
