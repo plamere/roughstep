@@ -1,0 +1,568 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<script src="js/raphael-min.js" type="text/javascript" charset="utf-8"></script>
+<link href="bootstrap/css/bootstrap.css" rel="stylesheet" media="screen">
+<link rel="stylesheet" href="styles.css" type="text/css" media="screen">
+<script src="js/jquery.min.js"></script>
+<script src="js/underscore-min.js"></script>
+<script src="simple_library.js"></script>
+<script type="text/javascript" src="jremix.js"></script> 
+<title> My hack </title>
+</head>
+
+<body>
+<div id="wrap" class="navbar navbar-inverse">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </a>
+      <a id='show-search' class="brand">My Hack</a>
+      <div class="nav-collapse collapse">
+        <ul class="nav">
+          <li class="active"><a id='show-main'  href="index.html">Main</a></li>
+          <li><a id='show-gallery' href="gallery.html" >Gallery of songs</a></li>
+          <li><a id='show-loader' href="loader.html">Upload a song</a></li>
+          <li><a id='show-about' href="about.html">About</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id='info-div' class="offset1 span8">
+    <span id='info'> </span> 
+</div>
+
+<div id='error'> </div> 
+<div id="hero">
+    <div class="offset1 span8">
+       <div id="dog-viz"> </div>
+       <div id="controls">
+          <button id="go" class="btn btn-info"><i id='go-inner' class="icon-play"></i></button>
+          <label class="checkbox inline"> <input id='audio-on' checked type="checkbox"> Audio </label>
+          <label class="checkbox inline"> <input id='dogs-on' checked type="checkbox"> Pack </label>
+          <label class="checkbox inline"> 
+                <input id='show-browser' data-toggle="collapse" 
+                    data-target="#viz-div" type="checkbox"> Under the hood
+           </label>
+<span id='tweet-span'> 
+    <a href="https://twitter.com/share" id='tweet' class="twitter-share-button" data-lang="en" data-count='none'>Tweet</a>
+    <script>!function(d,s,id){var
+    js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+</span>
+        </div>
+    </div>
+    <div class="row span12 collapse" id="viz-div">
+            <div class='figure' id='seg-viz'>
+                <div class='widget'> </div>
+                <div class='caption'></div>
+            </div>
+    </div>
+</div>
+</div>
+<br>
+
+<div id="legend" class="hero span12">
+    legend
+</div>
+
+</body>
+<script src="bootstrap/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-3675615-27']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type =
+'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' :
+'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0];
+s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+<script type="text/javascript">
+
+var paper;
+var remixer;
+var player;
+var dogsOn = true;
+var fullAudioVolume = 1;
+var curTrack;
+var isPlaying;
+
+// The frequencies of the notes on the fictional stylophone.
+// If these match the frequencies on a real stylophone, it is
+// totally by coincidence.
+
+
+var dogQueue = [];
+
+function buildSongFromAnalysis(track) {
+    var segments = track.analysis.segments;
+    for (var i = 0; i < segments.length; i++) {
+        var segment = segments[i];
+    }
+
+    var yip = oneShots['y'];
+    _.each(track.analysis.beats, function(beat, i) {
+        //console.log('beat', beat);
+        dogPost(beat.start, yip);
+    });
+}
+
+
+function dogPost(startTime, q) {
+    var mq = { time:startTime, q:q};
+    dogQueue.push(mq);
+}
+
+
+function info(s) {
+    $("#info").text(s);
+}
+
+function error(s) {
+    if (s.length == 0) {
+        $("#error").hide();
+    } else {
+        $("#error").text(s);
+        $("#error").show();
+    }
+}
+
+
+function extractTitle(url) {
+    var lastSlash = url.lastIndexOf('/');
+    if (lastSlash >= 0 && lastSlash < url.length - 1) {
+        var res =  url.substring(lastSlash + 1, url.length - 4);
+        return res;
+    } else {
+        return url;
+    }
+}
+
+function getTitle(title, artist, url) {
+    if (title == undefined || title.length == 0 || title === '(unknown title)' || title == 'undefined') {
+        if (url) {
+            title = extractTitle(url);
+        } else {
+            title = null;
+        }
+    } else {
+        if (artist !== '(unknown artist)') {
+            title = title + ' by ' + artist;
+        } 
+    }
+    return title;
+}
+
+function loadTrack(trid) {
+    fetchAnalysis(trid);
+}
+
+function setDisplayMode(playMode) {
+    if (playMode) {
+        $("#controls").show();
+        $("#tweet-span").show();
+    } else {
+        $("#controls").hide();
+        $("#tweet-span").hide();
+    } 
+}
+
+function showTrackTitle(t) {
+    info(t.title + ' by ' + t.artist);
+}
+
+
+function interp(val, inLow, inHigh, outLow, outHigh) {
+    if (val < inLow) {
+        val = inLow;
+    }
+
+    if (val > inHigh) {
+        val = inHigh;
+    }
+
+    var scaleIn = (val - inLow) / (inHigh - inLow);
+    var scaleOut =  outHigh - scaleIn * (outHigh - outLow);
+    return scaleOut;
+}
+
+
+function stateCallback(playState) {
+    if (playState) {
+        $("#go-inner").removeClass("icon-play");
+        $("#go-inner").addClass("icon-paws");
+    } else {
+        $("#go-inner").removeClass("icon-paws");
+        $("#go-inner").addClass("icon-play");
+    }
+}
+
+function trackReady(t) {
+    curTrack = t;
+    t.fixedTitle = getTitle(t.title, t.artist, t.info.url);
+    document.title = 'The Saddest Stylophone plays ' + t.fixedTitle;
+    var volume = interp(t.audio_summary.loudness, -12, -6, .4, 1);
+    fullAudioVolume = volume;
+    setVolume();
+    buildSongFromAnalysis(t);
+}
+
+function setVolume() {
+    var audioVolume = $("#audio-on").is(':checked') ? fullAudioVolume : 0;
+    player.setVolume(audioVolume);
+}
+
+
+function fetchAnalysis(trid) {
+    var url = 'http://static.echonest.com/infinite_jukebox_data/' + trid + '.json';
+    info('Fetching the sheet music');
+    // showPlotPage(trid);
+    $.getJSON(url, function(data) { gotTheAnalysis(data); } )
+        .error( function() { 
+            info("Sorry, can't find info for that track");
+        });
+}
+
+function get_status(data) {
+    if (data.response.status.code == 0) {
+        return data.response.track.status;
+    } else {
+        return 'error';
+    }
+}
+
+function getAudioContext() {
+    if (window.webkitAudioContext) {
+        return new webkitAudioContext();
+    } else {
+        return new AudioContext();
+    }
+}
+
+
+function urldecode(str) {
+   return decodeURIComponent((str+'').replace(/\+/g, '%20'));
+}
+
+
+function loadScaleSample(sound, buffer) {
+    // console.log('   ', sound, buffer);
+}
+
+var oneShots = {
+}
+
+function loadSampleLibrary() {
+    _.each(soundLibrary, function(sound) {
+        // console.log(sound);
+        if (sound.type == 'scale') {
+            remixer.fetchSound( 'audio/' + sound.file, function(ok, buffer) {
+                if (ok) {
+                    // console.log('loading buffer map');
+                    loadScaleSample(sound, buffer);
+                }
+            });
+        } else{
+            remixer.fetchSound( 'audio/' + sound.file, function(ok, buffer) {
+                if (ok) {
+                    // console.log('loading buffer map');
+                    var newQ = {
+                        start:0,
+                        duration: buffer.duration,
+                        track: {
+                            buffer:buffer,
+                        }
+                    };
+                    if (sound.key in oneShots) {
+                        console.log("Conflicting oneshots for",sound.key);
+                    } else {
+                        oneShots[sound.key] = newQ;
+                    }
+                }
+            });
+        }
+    });
+}
+
+
+function startPlaying() {
+    var dq = dogQueue.slice(0);
+
+    function getNextDog(nextTime) {
+        if (dq.length > 0) {
+            var next = dq[0];
+            if (next.time < nextTime) {
+                dq.shift();
+                return next;
+            }
+        }
+        return null;
+    }
+
+    var curQ = curTrack.analysis.beats[0];
+    if (!isPlaying) {
+        stateCallback(true);
+        isPlaying = true;
+        player.start();
+        function playNext() {
+            if (isPlaying) {
+                if (curQ) {
+                    var now = player.curTime();
+                    while (true) {
+                        var dq = getNextDog(curQ.start + curQ.duration);
+                        if (dq) {
+                            player.playOneShot(dq.time, dq.q);
+                        } else {
+                            break;
+                        }
+                    }
+                    player.play(curQ.start, curQ);
+                    curQ = curQ.next;
+                    var delta = curQ.start - now;
+                    setTimeout(playNext, 1000 * delta - 5);
+                }
+            }
+        }
+        playNext();
+    }
+}
+
+function stopPlaying() {
+    stateCallback(false);
+    isPlaying = false;
+    player.stop();
+}
+
+function init() {
+    jQuery.ajaxSettings.traditional = true;  
+    setDisplayMode(false);
+
+    window.oncontextmenu = function(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+    };
+
+    document.ondblclick = function DoubleClick(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+    }
+
+    $("#error").hide();
+
+    $("#go").click(function() {
+        if (isPlaying) {
+            stopPlaying();
+        } else {
+            startPlaying();
+        }
+    });
+
+    $("#dogs-on").change(function() {
+        dogsOn = $(this).is(':checked');
+    });
+
+    $("#audio-on").change(function() {
+        setVolume();
+    });
+
+    paper = Raphael("dog-viz", 640, 387);
+    var context = getAudioContext();
+    remixer = createJRemixer(context, $);
+    player = remixer.getPlayer();
+
+    loadSampleLibrary();
+
+    if (window.webkitAudioContext === undefined && window.AudioContext === undefined) {
+        error("Sorry, this app needs advanced web audio. Your browser doesn't"
+            + " support it. Try the latest version of Chrome, Firefox (nightly)  or Safari");
+
+        hideAll();
+
+    } else {
+        // var context = new webkitAudioContext();
+        processParams();
+    }
+}
+
+
+function showPlotPage(trid) {
+    var url = location.protocol + "//" + 
+                location.host + location.pathname + "?trid=" + trid;
+    location.href = url;
+}
+
+function analyzeAudio(audio, tag, callback) {
+    var url = 'http://labs.echonest.com/Uploader/qanalyze?callback=?'
+    $.getJSON(url, { url:audio, tag:tag}, function(data) {
+        if (data.status === 'done' || data.status === 'error') {
+            callback(data);
+        } else {
+            info(data.status + ' - ready in about ' + data.estimated_wait + ' secs. ');
+            setTimeout(function() { analyzeAudio(audio, tag, callback); }, 5000);
+        } 
+    });
+}
+
+function setURL() {
+    if (track) {
+        var p = '?trid=' + track.id;
+        if (driver.getIncr() != 1) {
+            p += '&inc=' + driver.getIncr();
+        }
+
+        var factor = Math.round(100 * player.getSpeedFactor());
+        if (factor != 100) {
+            p += '&p=' + factor;
+        }
+
+        if (bMode != 'beats') {
+            p += '&b=' + bMode;
+        }
+    }
+
+    history.replaceState({}, document.title, p);
+    tweetSetup(track);
+}
+
+function tweetSetup(t) {
+    $(".twitter-share-button").remove();
+    var tweet = $('<a>')
+        .attr('href', "https://twitter.com/share")
+        .attr('id', "tweet")
+        .attr('class', "twitter-share-button")
+        .attr('data-lang', "en")
+        .attr('data-count', "none")
+        .text('Tweet');
+
+    $("#tweet-span").prepend(tweet);
+    if (t) {
+        tweet.attr('data-text',  "A sad and pathetic version of " + t.fixedTitle + " played by #sadstylophone");
+        tweet.attr('data-url', document.URL);
+    } 
+    // twitter can be troublesome. If it is not there, don't bother loading it
+    if ('twttr' in window) {
+        twttr.widgets.load();
+    }
+}
+
+function isValidBeatMode(p) {
+    return p === 'bars' || p == 'beats' || p == 'tatums';
+}
+
+function setSpeedFactor(factor) {
+    player.setSpeedFactor(factor)
+    $("#speed").text(Math.round(factor * 100));
+}
+
+function readyToPlay(t) {
+    if (t.status === 'ok') {
+        trackReady(t);
+        setDisplayMode(true);
+        info("ready!");
+        showTrackTitle(t);
+        tweetSetup(t);
+    } else {
+        info(t.status);
+    }
+}
+
+function gotTheAnalysis(profile) {
+    var status = get_status(profile);
+    if (status == 'complete') {
+        info("Loading track ...");
+        remixer.remixTrack(profile.response.track, function(state, t, percent) {
+            if (state == 1) {
+                info("Here we go ...");
+                setTimeout( function() { readyToPlay(t); }, 10);
+            } else if (state == 0) {
+                if (percent >= 99) {
+                    info("Here we go ...");
+                } else {
+                    info( percent  + "% of track loaded ");
+                }
+            } else {
+                info('Trouble  ' + t.status);
+            }
+        });
+    } else if (status == 'error') {
+        info("Sorry, couldn't analyze that track");
+    }
+}
+
+
+
+function get_status(data) {
+    if (data.response.status.code == 0) {
+        return data.response.track.status;
+    } else {
+        return 'error';
+    }
+}
+
+
+
+
+function processParams() {
+    var params = {};
+    var q = document.URL.split('?')[1];
+    if(q != undefined){
+        q = q.split('&');
+        for(var i = 0; i < q.length; i++){
+            var pv = q[i].split('=');
+            var p = pv[0];
+            var v = pv[1];
+            params[p] = v;
+        }
+    }
+
+    if ('trid' in params) {
+        var trid = params['trid'];
+        fetchAnalysis(trid);
+    } else if ('key' in params) {
+        var url = 'http://' + params['bucket'] + '/' + urldecode(params['key']);
+        info("analyzing audio");
+        $("#select-track").hide();
+        analyzeAudio(url, 'tag', 
+            function(data) {
+                if (data.status === 'done') {
+                    showPlotPage(data.trid);
+                } else {
+                    info("Trouble analyzing that track " + data.message);
+                }
+            }
+        );
+    }
+    else {
+        setDisplayMode(false);
+    }
+}
+
+
+function ga_track(page, action, id) {
+    _gaq.push(['_trackEvent', page, action, id]);
+}
+
+
+$(document).ready(function() {
+    init();
+});
+
+
+</script>
+</html>
+

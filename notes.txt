@@ -1,0 +1,36 @@
+
+ - start at intro
+
+ - find the best place for the drop
+     - best - loudest most mechanical section
+        - try - loudest phrase or second to last phrase
+     - second - loudest, most confident beats
+ - force a transition to 'drop-intro' at N beats before drop
+
+
+
+graph:
+
+    intro -> 
+        (verse* chorus*)*
+        verse
+        chorus
+        intro-drop
+        drop
+
+
+
+
+1) Load library.js as quantum
+2) Schedule a simple on the beat pattern
+3) Add on off-beat in a separate voice
+4) write pattern scheduler:
+    
+    should offer varied sequences
+    supports varied voices
+    supports the drop. (extra, can we stop the main audio to support the drop
+    Create an animation
+    Make it look nice, add some puns
+
+
+
