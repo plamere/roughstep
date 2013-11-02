@@ -1,7 +1,6 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-<script src="js/raphael-min.js" type="text/javascript" charset="utf-8"></script>
 <link href="bootstrap/css/bootstrap.css" rel="stylesheet" media="screen">
 <link rel="stylesheet" href="styles.css" type="text/css" media="screen">
 <script src="js/jquery.min.js"></script>
@@ -9,7 +8,11 @@
 <script src="simple_library.js"></script>
 <script src="patterns.js?v=1"></script>
 <script type="text/javascript" src="jremix.js"></script> 
-<title> Rough Step</title>
+<script type="text/javascript" src="galleria/galleria-1.3.1.min.js">
+<link typea"text/css" rel="stylesheet" href="galleria/themes/classic/galleria.classic.css">
+<script src="plugins/flickr/galleria.flickr.min.js"></script>
+
+<title> Dogstep</title>
 </head>
 
 <body>
@@ -21,11 +24,11 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </a>
-      <a id='show-search' class="brand">Rough Step</a>
+      <a id='show-search' class="brand">Dogstep</a>
       <div class="nav-collapse collapse">
         <ul class="nav">
           <li class="active"><a id='show-main'  href="index.html">Main</a></li>
-          <li><a id='show-gallery' href="gallery.html" >Gallery of songs</a></li>
+          <li><a id='show-gallery' href="gallery.html" >The Kennel</a></li>
           <li><a id='show-loader' href="loader.html">Upload a song</a></li>
           <li><a id='show-about' href="about.html">About</a></li>
         </ul>
@@ -41,28 +44,21 @@
 <div id='error'> </div> 
 <div id="hero">
     <div class="offset1 span8">
-       <div id="dog-viz"> </div>
-       <div id="which-bar"> </div>
+       <div id="galleria"> 
+            <!--
+            <img src="images/cool-dog.jpg" data-title="my title">
+            <img src="images/TheFW-skrillex-dog.jpg" data-title="my title">
+            -->
+       </div>
        <div id="controls">
           <button id="go" class="btn btn-info"><i id='go-inner' class="icon-play"></i></button>
-          <label class="checkbox inline"> <input id='audio-on' checked type="checkbox"> Audio </label>
-          <label class="checkbox inline"> <input id='dogs-on' checked type="checkbox"> Pack </label>
-          <label class="checkbox inline"> 
-                <input id='show-browser' data-toggle="collapse" 
-                    data-target="#viz-div" type="checkbox"> Under the hood
-           </label>
+           <span id="which-bar"> </span>
 <span id='tweet-span'> 
     <a href="https://twitter.com/share" id='tweet' class="twitter-share-button" data-lang="en" data-count='none'>Tweet</a>
     <script>!function(d,s,id){var
     js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 </span>
         </div>
-    </div>
-    <div class="row span12 collapse" id="viz-div">
-            <div class='figure' id='seg-viz'>
-                <div class='widget'> </div>
-                <div class='caption'></div>
-            </div>
     </div>
 </div>
 </div>
@@ -94,17 +90,12 @@ s.parentNode.insertBefore(ga, s);
 
 <script type="text/javascript">
 
-var paper;
 var remixer;
 var player;
 var dogsOn = true;
 var fullAudioVolume = 1;
 var curTrack;
 var isPlaying;
-
-// The frequencies of the notes on the fictional stylophone.
-// If these match the frequencies on a real stylophone, it is
-// totally by coincidence.
 
 
 var dogQueue = [];
@@ -114,30 +105,39 @@ var scales = { }
 var oneShots = { }
 function buildSongFromAnalysis(track) {
     _.each(track.analysis.sections, function(section, i) {
-        console.log('sec', section.start, section.children.length);
+        // console.log('sec', section.start, section.children.length);
     });
     var curState = patternGraph.intro.first;
     _.each(track.analysis.bars, function(bar, i) {
         nextStateName = getNextState(curState);
-        console.log(bar.which, curState, '-->', nextStateName);
+        //console.log(bar.which, curState, '-->', nextStateName);
         curState = patternGraph.intro[nextStateName];
         _.each(curState.patterns, function(pattern) {
             postPatternForBar(bar, pattern);
         });
     });
 
-    console.log('loudness bars');
     var loudest = findLoudestBars(track, 20);
     _.each(loudest, function(bar) {
-        console.log('loud', bar.which, getBarLoudness(bar));
+        // console.log('loud', bar.which, getBarLoudness(bar));
     });
-    console.log('filtered loudness bars');
     var filteredLoudest = filterBars(loudest, 12);
-    _.each(filteredLoudest, function(bar) {
-        console.log('floud', bar.which, getBarLoudness(bar));
-        _.each(howlPatterns, function(pattern) {
+    sortByTime(filteredLoudest);
+    _.each(filteredLoudest, function(bar, index) {
+        console.log('loud', bar.which, getBarLoudness(bar));
+        var howl = howlPatterns;
+        if (index ==0) {
+            howl = superHowlPatterns;
+        }
+        _.each(howl, function(pattern) {
             postPatternForBar(bar, pattern);
         });
+    });
+}
+
+function sortByTime(bars) {
+    bars.sort(function(a,b) {
+        return a.start - b.start;
     });
 }
 
@@ -187,6 +187,8 @@ function getBarLoudness(bar) {
 }
 
 function songPostProcess() {
+    assignNotesToSegments(curTrack.analysis.segments);
+
     dogQueue.sort(function(a,b) {
         return a.time - b.time;
     });
@@ -243,6 +245,194 @@ function sqi(idx) {
 function dogPost(startTime, q) {
     var mq = { time:startTime + q.sound.offset, q:q};
     dogQueue.push(mq);
+}
+
+var totalNotes = 0;
+
+function assignNoteToSegment(seg) {
+    var minConfidence = .3;
+    var minDuration = .2;
+    var noNoteThreshold = .2;
+    var maxVal = 0;
+    var maxIndex = 0;
+    var sum = 0;
+
+    if (seg.confidence < minConfidence) {
+        seg.note = -1;
+        return;
+    }
+
+    if (seg.duration < minDuration) {
+        seg.note = -1;
+        return;
+    }
+
+    for (var i = 0; i < seg.pitches.length; i++) {
+        var val = seg.pitches[i];
+        if (val > maxVal) {
+            maxVal = val;
+            maxIndex = i;
+        }
+        sum += val;
+    }
+    var avg = sum / seg.pitches.length;
+
+    if (avg > noNoteThreshold) {
+        seg.note = -1;
+    } else {
+        seg.note = maxIndex;
+        totalNotes++;
+    }
+}
+
+function getSimpleNote(seg) {
+    var noNoteThreshold = .3;
+    var maxVal = 0;
+    var maxIndex = 0;
+    var sum = 0;
+
+    for (var i = 0; i < seg.pitches.length; i++) {
+        var val = seg.pitches[i];
+        if (val > maxVal) {
+            maxVal = val;
+            maxIndex = i;
+        }
+        sum += val;
+    }
+    var avg = sum / seg.pitches.length;
+
+    if (avg > noNoteThreshold) {
+        seg.note = -1;
+    } else {
+        seg.note = maxIndex;
+    }
+    return seg.note;
+}
+
+function filterSegments(segments) {
+    var minConfidence = .3;
+    var minDuration = 1.0;
+    var segs = [];
+
+    var last = null;
+    var lastFreq = 0;
+    var skipped = 0;
+
+    for (var i = 0; i < segments.length; i++) {
+        var seg = segments[i];
+        var note = getSimpleNote(seg);
+        var skip = false;
+        
+        if (note < 0) {
+            skipped++;
+        }
+        if (last && note >= 0) {
+            if (note == lastNote && seg.confidence < minConfidence && seg.duration < minDuration) {
+                last.duration += seg.duration;
+                skip = true;
+            }
+        }
+
+        if (!skip) {
+            segs.push(seg);
+            last = seg;
+            lastNote = note;
+        }  else {
+        }
+    }
+
+    for (var i = 0; i < segs.length - 1; i++) {
+        var seg = segs[i];
+        seg.which = i;
+        if (i > 0) {
+            seg.prev = segs[i-1];
+        } else {
+            seg.prev = null
+        }
+        
+        if (i < segs.length - 1) {
+            seg.next = segs[i+1];
+        } else {
+            seg.next = null
+        }
+    }
+    return segs;
+}
+
+function assignNotesToSegments(segments) {
+    var segs = filterSegments(segments);
+    removeShortNoteSequences(segs, 4);
+    var longest = findLongestSequence(segs);
+    barkTheMelody(segs);
+}
+
+function findLongestSequence(segs) {
+    var run = 0;
+    var longest = 0;
+    var longestStart = 0;
+    for (var i = 0; i < segs.length; i++) {
+        var seg = segs[i];
+        if (seg.note >= 0) {
+            run++;
+        } else {
+            if (run > 0) {
+                if (run > longest) {
+                    longest = run;
+                    longestStart = i - run;
+                }
+                run = 0;
+            }
+        }
+    }
+
+    var out = [];
+    for (var i = 0; i < longest; i++)  {
+        out.push(segs[i + longestStart]);
+    }
+    return out;
+}
+
+function removeShortNoteSequences(segments, minSequenceLength) {
+    var run = 0;
+    for (var i = 0; i < segments.length; i++) {
+        var seg = segments[i];
+        if (seg.note >=0) {
+            run++;
+        } else if (run > 0)  {
+            if (run < minSequenceLength) {
+                var last = i - 1;
+                for (var j = 0; j < run; j++) {
+                    segments[last - j].note = -1;
+                }
+            }
+            run = 0;
+        } else {
+        }
+    }
+}
+
+function sequenceStats(segments) {
+    console.log('ss stats');
+    var run = 0;
+    for (var i = 0; i < segments.length; i++) {
+        var seg = segments[i];
+        if (seg.note >= 0) {    
+            run++;
+        } else if (run > 0) {
+            console.log('seq stats', seg.which - run, run);
+            run = 0;
+        }
+    }
+}
+
+
+
+function barkTheMelody(segments) {
+    _.each(segments, function(seg) {
+        if (seg.note >=0) {
+            dogPost(seg.start, sqi(seg.note));
+        }
+    });
 }
 
 
@@ -332,7 +522,7 @@ function stateCallback(playState) {
 function trackReady(t) {
     curTrack = t;
     t.fixedTitle = getTitle(t.title, t.artist, t.info.url);
-    document.title = 'The Saddest Stylophone plays ' + t.fixedTitle;
+    document.title = t.fixedTitle + '(roughstep)';
     var volume = interp(t.audio_summary.loudness, -12, -6, .4, 1);
     fullAudioVolume = volume;
     setVolume();
@@ -341,8 +531,7 @@ function trackReady(t) {
 }
 
 function setVolume() {
-    var audioVolume = $("#audio-on").is(':checked') ? fullAudioVolume : 0;
-    player.setVolume(audioVolume);
+    player.setVolume(fullAudioVolume);
 }
 
 
@@ -379,7 +568,6 @@ function urldecode(str) {
 
 
 function loadScaleSample(sound, buffer) {
-    // console.log('   ', sound, buffer);
     var start = 0;
     var quanta = [];
     for (var i = 0; i < sound.notes; i++) {
@@ -404,18 +592,15 @@ function loadScaleSample(sound, buffer) {
 
 function loadSampleLibrary() {
     _.each(soundLibrary, function(sound) {
-        // console.log(sound);
         if (sound.type == 'scale') {
             remixer.fetchSound( 'audio/' + sound.file, function(ok, buffer) {
                 if (ok) {
-                    // console.log('loading buffer map');
                     loadScaleSample(sound, buffer);
                 }
             });
         } else{
             remixer.fetchSound( 'audio/' + sound.file, function(ok, buffer) {
                 if (ok) {
-                    // console.log('loading buffer map');
                     var newQ = {
                         start:0,
                         duration: buffer.duration,
@@ -473,8 +658,12 @@ function startPlaying() {
                         whichBar.text(curQ.parent.which);
                     }
                     curQ = curQ.next;
-                    var delta = curQ.start - now;
-                    setTimeout(playNext, 1000 * delta - 5);
+                    if (curQ) {
+                        var delta = curQ.start - now;
+                        setTimeout(playNext, 1000 * delta - 5);
+                    } else {
+                        stopPlaying();
+                    }
                 }
             }
         }
@@ -514,15 +703,7 @@ function init() {
         }
     });
 
-    $("#dogs-on").change(function() {
-        dogsOn = $(this).is(':checked');
-    });
 
-    $("#audio-on").change(function() {
-        setVolume();
-    });
-
-    paper = Raphael("dog-viz", 640, 387);
     var context = getAudioContext();
     remixer = createJRemixer(context, $);
     player = remixer.getPlayer();
@@ -539,6 +720,10 @@ function init() {
         // var context = new webkitAudioContext();
         processParams();
     }
+    Galleria.loadTheme('galleria/themes/classic/galleria.classic.min.js');
+    Galleria.run('#galleria', {
+        flickr: 'search:dog'
+    });
 }
 
 
@@ -593,7 +778,7 @@ function tweetSetup(t) {
 
     $("#tweet-span").prepend(tweet);
     if (t) {
-        tweet.attr('data-text',  "A sad and pathetic version of " + t.fixedTitle + " played by #sadstylophone");
+        tweet.attr('data-text',  "A #roughstep version of " + t.fixedTitle);
         tweet.attr('data-url', document.URL);
     } 
     // twitter can be troublesome. If it is not there, don't bother loading it

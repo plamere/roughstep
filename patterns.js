@@ -194,3 +194,11 @@ var howlPatterns = [
 ];
 
 
+var superHowlPatterns = [
+    'H..H',
+    'gggg',
+    '..j',
+    '.jh'
+];
+
+
