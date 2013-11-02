@@ -8,14 +8,47 @@ var patternGraph = {
             patterns: [],
             next: [
                 { prob:10, next: 's0' },
-                { prob:10, next: 's1' }
+                { prob:10, next: 's0a' }
             ]
         },
         s0: {
                 patterns: ['....'],
                 next: [
-                    { prob:10, next: 's0' },
+                    { prob:20, next: 's0' },
+                    { prob:10, next: 's0b' },
+                    { prob:10, next: 's0a' },
+                ]
+            },
+        s0a: {
+                patterns: [
+                        'g.g.',
+                        '....'
+                    ],
+                next: [
+                    { prob:10, next: 's0a' },
+                    { prob:10, next: 's0b' },
+                    { prob:10, next: 's0c' },
+                    { prob:20, next: 's1' },
+                ]
+            },
+        s0b: {
+                patterns: [
+                        'g.*.',
+                        '....'
+                    ],
+                next: [
+                    { prob:10, next: 's0a' },
+                    { prob:10, next: 's0b' },
                     { prob:10, next: 's1' },
+                ]
+            },
+        s0c: {
+                patterns: [
+                        '*.g.',
+                    ],
+                next: [
+                    { prob:10, next: 's0c' },
+                    { prob:4, next: 's0a' },
                 ]
             },
         s1: {
@@ -28,7 +61,68 @@ var patternGraph = {
                     { prob:10, next: 's2' },
                     { prob:10, next: 's3' },
                     { prob:10, next: 's4' },
+                    { prob:5, next: 's1a' },
+                    { prob:5, next: 's1b' },
                     { prob:3, next: 'predrop' },
+                ]
+            },
+        s1a: {
+                patterns: [
+                        '1.1.',
+                        '.y.y'
+                    ],
+                next: [
+                    { prob:10, next: 's1a' },
+                    { prob:10, next: 's1b' },
+                    { prob:10, next: 's1' },
+                ]
+            },
+        s1b: {
+                patterns: [
+                        '1.1.',
+                        '*.*.',
+                        '.y.y'
+                    ],
+                next: [
+                    { prob:10, next: 's1b' },
+                    { prob:10, next: 's1a' },
+                    { prob:10, next: 's1' },
+                    { prob:10, next: 's1d' },
+                ]
+            },
+        s1c: {
+                patterns: [
+                        '1.*.',
+                        '.y.y'
+                    ],
+                next: [
+                    { prob:10, next: 's1c' },
+                    { prob:10, next: 's1a' },
+                    { prob:10, next: 's1b' },
+                    { prob:10, next: 's1d' },
+                ]
+            },
+        s1d: {
+                patterns: [
+                        '*.1.',
+                        '.y.y'
+                    ],
+                next: [
+                    { prob:10, next: 's1d' },
+                    { prob:10, next: 's1c' },
+                    { prob:10, next: 's1a' },
+                    { prob:10, next: 's1b' },
+                    { prob:10, next: 's1e' },
+                ]
+            },
+        s1e: {
+                patterns: [
+                        '*.1.',
+                        '.g.g'
+                    ],
+                next: [
+                    { prob:10, next: 's1e' },
+                    { prob:4, next: 's1d' },
                 ]
             },
         s2: {
@@ -47,7 +141,17 @@ var patternGraph = {
                     ],
                 next: [
                     { prob:10, next: 's3' },
+                    { prob:1, next: 's3a' },
                     { prob:10, next: 's1' },
+                ]
+            },
+        s3a: {
+                patterns: [
+                        'g.g.',
+                        'my.y',
+                    ],
+                next: [
+                    { prob:10, next: 's3' },
                 ]
             },
         s4: {
@@ -61,7 +165,17 @@ var patternGraph = {
             },
         predrop: {
                 patterns: [
-                        'H',
+                        'g.g.',
+                        '.*.*',
+                        'yyyy',
+                    ],
+                next: [
+                    { prob:10, next: 'drop' },
+                ]
+            },
+        drop: {
+                patterns: [
+                        'h',
                         'g.g.',
                         '.y.y',
                     ],
@@ -71,138 +185,12 @@ var patternGraph = {
                 ]
             },
     },
-}
+};
 
+var howlPatterns = [
+    'H',
+    'gggg',
+    '..j'
+];
 
-var oldPatternGraph = {
-    intro: {
-        first: {
-            pattern: '',
-            next: [
-                { prob:10, next: 's0' },
-                { prob:10, next: 's1' }
-            ]
-        },
-        s0: {
-                pattern: '....',
-                next: [
-                    { prob:10, next: 's0' },
-                    { prob:10, next: 's1' },
-                    { prob:10, next: 's1a' }
-                ]
-            },
-
-        s1: {
-                pattern: '0',
-                next: [
-                    { prob:10, next: 's1' },
-                    { prob:10, next: 's1a' },
-                    { prob:10, next: 's2' }
-                ]
-            },
-        s1a: {
-                pattern: '0.0.0..y',
-                next: [
-                    { prob:10, next: 's1a' },
-                    { prob:10, next: 's2' }
-                ]
-            },
-
-        s2: {
-                pattern: '0.0.',
-                next: [
-                    { prob:5, next: 's1' },
-                    { prob:20, next: 's2' },
-                    { prob:10, next: 's3' },
-                    { prob:10, next: 's2b' }
-                ]
-            },
-        s2a: {
-                pattern: '0234',
-                next: [
-                    { prob:10, next: 's2' },
-                    { prob:20, next: 's2' },
-                    { prob:10, next: 's3' },
-                    { prob:10, next: 's4a' },
-                    { prob:10, next: 's5' }
-                ]
-            },
-        s2b: {
-                pattern: '0000',
-                next: [
-                    { prob:10, next: 's2b' },
-                    { prob:4, next: 's2' },
-                ]
-            },
-        s3: {
-                pattern: '0..2',
-                next: [
-                    { prob:10, next: 's2' },
-                    { prob:10, next: 's3' },
-                    { prob:10, next: 's4' },
-                    { prob:10, next: 'predrop1' },
-                    { prob:10, next: 'drop2' }
-                ]
-            },
-        s4: {
-                pattern: '0.0.0..y',
-                next: [
-                    { prob:20, next: 's3' },
-                    { prob:20, next: 's4a' }
-                ]
-            },
-        s4a: {
-                pattern: '0y2y1y2y',
-                next: [
-                    { prob:40, next: 's4a' },
-                    { prob:20, next: 's3' }
-                ]
-            },
-
-        s5: {
-                pattern: '3yyy',
-                next: [
-                    { prob:20, next: 's4' },
-                    { prob:5, next: 's2' }
-                ]
-            },
-
-        predrop1: {
-            pattern: 'yyyy',
-            next: [
-                { prob:20, next: 'predrop1' },
-                { prob:20, next: 'predrop2' }
-            ]
-        },
-
-        predrop2: {
-            pattern: 'yyyyyyyy',
-            next: [
-                { prob:10, next: 'predrop2' },
-                { prob:20, next: 'predrop3' }
-            ]
-        },
-
-        predrop3: {
-            pattern: 'yyy.yyy.',
-            next: [
-                { prob:20, next: 'drop1' },
-                { prob:20, next: 'drop2' }
-            ]
-        },
-
-        drop1: {
-            pattern: 'Hy01',
-            next: [
-                { prob:20, next: 's2' }
-            ]
-        },
-        drop2: {
-            pattern: 'h.01',
-            next: [
-                { prob:20, next: 's2' }
-            ]
-        }
-    }
-}
 

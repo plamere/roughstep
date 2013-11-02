@@ -7,7 +7,7 @@
 <script src="js/jquery.min.js"></script>
 <script src="js/underscore-min.js"></script>
 <script src="simple_library.js"></script>
-<script src="patterns.js"></script>
+<script src="patterns.js?v=1"></script>
 <script type="text/javascript" src="jremix.js"></script> 
 <title> Rough Step</title>
 </head>
@@ -42,6 +42,7 @@
 <div id="hero">
     <div class="offset1 span8">
        <div id="dog-viz"> </div>
+       <div id="which-bar"> </div>
        <div id="controls">
           <button id="go" class="btn btn-info"><i id='go-inner' class="icon-play"></i></button>
           <label class="checkbox inline"> <input id='audio-on' checked type="checkbox"> Audio </label>
@@ -118,12 +119,71 @@ function buildSongFromAnalysis(track) {
     var curState = patternGraph.intro.first;
     _.each(track.analysis.bars, function(bar, i) {
         nextStateName = getNextState(curState);
-        console.log('next state is', nextStateName);
+        console.log(bar.which, curState, '-->', nextStateName);
         curState = patternGraph.intro[nextStateName];
         _.each(curState.patterns, function(pattern) {
             postPatternForBar(bar, pattern);
         });
     });
+
+    console.log('loudness bars');
+    var loudest = findLoudestBars(track, 20);
+    _.each(loudest, function(bar) {
+        console.log('loud', bar.which, getBarLoudness(bar));
+    });
+    console.log('filtered loudness bars');
+    var filteredLoudest = filterBars(loudest, 12);
+    _.each(filteredLoudest, function(bar) {
+        console.log('floud', bar.which, getBarLoudness(bar));
+        _.each(howlPatterns, function(pattern) {
+            postPatternForBar(bar, pattern);
+        });
+    });
+}
+
+function filterBars(bars, minDistance) {
+    var out = [];
+
+    _.each(bars, function(bar) {
+        if (shortestDistance(out, bar) > minDistance) {
+            out.push(bar);
+        }
+    });
+    return out;
+}
+
+function shortestDistance(bars, bar) {
+    var shortest = 1000000;
+    _.each(bars, function(b) {
+        var dist = Math.abs(b.which - bar.which);
+        if (dist < shortest) {
+            shortest = dist;
+        }
+    });
+    return shortest;
+}
+
+
+function findLoudestBars(track, num) {
+    var bars = track.analysis.bars.slice(0);
+    bars.sort(function(a,b) {
+        return getBarLoudness(a) - getBarLoudness(b);
+    });
+    bars.reverse();
+    return bars.slice(0, num);
+}
+
+function getBarLoudness(bar) {
+    var sum = 0;
+    _.each(bar.overlappingSegments, function(seg) {
+        sum += 60 + seg.loudness_max;
+    });
+
+    if (bar.overlappingSegments.length > 0) {
+        return sum / bar.overlappingSegments.length;
+    } else {
+        return 0;
+    }
 }
 
 function songPostProcess() {
@@ -378,6 +438,7 @@ function loadSampleLibrary() {
 
 function startPlaying() {
     var dq = dogQueue.slice(0);
+    var whichBar = $("#which-bar");
 
     function getNextDog(nextTime) {
         if (dq.length > 0) {
@@ -408,6 +469,9 @@ function startPlaying() {
                         }
                     }
                     player.play(curQ.start, curQ);
+                    if (curQ.parent) {
+                        whichBar.text(curQ.parent.which);
+                    }
                     curQ = curQ.next;
                     var delta = curQ.start - now;
                     setTimeout(playNext, 1000 * delta - 5);

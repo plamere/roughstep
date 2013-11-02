@@ -9,6 +9,7 @@ var soundLibrary = [
         offset: 0,
         description: 'tenor dog bark',
     },
+    /*
     {
         name: 'woof-broken',
         type: 'scale',
@@ -49,6 +50,7 @@ var soundLibrary = [
         offset: 0,
         description: 'tenor dog bark',
     },
+    */
     {
         name: 'bark',
         type: 'scale',
@@ -59,6 +61,7 @@ var soundLibrary = [
         offset: 0.05,
         description: 'german shepherd tenor dog bark',
     },
+    /*
     {
         name: 'bark-droid',
         type: 'scale',
@@ -109,6 +112,7 @@ var soundLibrary = [
         offset: 0.05,
         description: 'german shepherd tenor dog bark',
     },
+    */
     {
         name: 'monster',
         type: 'oneshot',
