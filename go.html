@@ -42,7 +42,7 @@
 
 <div id='error'> </div> 
 <div id="hero">
-    <div class="offset1 span8">
+    <div class="offset1 span11">
        <div id="galleria"> 
             <!--
             <img src="images/cool-dog.jpg" data-title="my title">
@@ -64,7 +64,7 @@
 <br>
 
 <div id="legend" class="hero span12">
-    legend
+Unmuzzle your music
 </div>
 
 </body>
@@ -536,8 +536,7 @@ function setVolume() {
 
 function fetchAnalysis(trid) {
     var url = 'http://static.echonest.com/infinite_jukebox_data/' + trid + '.json';
-    info('Fetching the sheet music');
-    // showPlotPage(trid);
+    info('Unleashing the hounds');
     $.getJSON(url, function(data) { gotTheAnalysis(data); } )
         .error( function() { 
             info("Sorry, can't find info for that track");

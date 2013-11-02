@@ -1,9 +1,9 @@
 var favSongs = [
     {
-        "artist": "AWOLNATION", 
-        "id": "TRWHQOK13B357AB74A", 
-        "title": "Sail", 
-        "visits": 62
+        "artist": "The White Stripes", 
+        "id": "TRMQYSY13B4C10127E", 
+        "title": "Seven Nation Army", 
+        "visits": 29
     }, 
     {
         "artist": "Daft Punk", 
@@ -12,16 +12,16 @@ var favSongs = [
         "visits": 110
     }, 
     {
+        "artist": "AWOLNATION", 
+        "id": "TRWHQOK13B357AB74A", 
+        "title": "Sail", 
+        "visits": 62
+    }, 
+    {
         "artist": "Muse", 
         "id": "TRHIUST13B5695A3E4", 
         "title": "Madness", 
         "visits": 62
-    }, 
-    {
-        "artist": "The White Stripes", 
-        "id": "TRMQYSY13B4C10127E", 
-        "title": "Seven Nation Army", 
-        "visits": 29
     }, 
     {
         "artist": "Daft Punk", 

@@ -1,1 +1,1 @@
-s3cmd sync --acl-public *  s3://static.echonest.com/stylophone/
+s3cmd sync --acl-public *  s3://static.echonest.com/dogstep/
