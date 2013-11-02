@@ -19,8 +19,6 @@ graph:
         drop
 
 
-
-
 1) Load library.js as quantum
 2) Schedule a simple on the beat pattern
 3) Add on off-beat in a separate voice

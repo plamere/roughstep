@@ -7,8 +7,9 @@
 <script src="js/jquery.min.js"></script>
 <script src="js/underscore-min.js"></script>
 <script src="simple_library.js"></script>
+<script src="patterns.js"></script>
 <script type="text/javascript" src="jremix.js"></script> 
-<title> My hack </title>
+<title> Rough Step</title>
 </head>
 
 <body>
@@ -20,7 +21,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </a>
-      <a id='show-search' class="brand">My Hack</a>
+      <a id='show-search' class="brand">Rough Step</a>
       <div class="nav-collapse collapse">
         <ul class="nav">
           <li class="active"><a id='show-main'  href="index.html">Main</a></li>
@@ -110,42 +111,72 @@ var dogQueue = [];
 var curScale = null;
 var scales = { }
 var oneShots = { }
+function buildSongFromAnalysis(track) {
+    _.each(track.analysis.sections, function(section, i) {
+        console.log('sec', section.start, section.children.length);
+    });
+    var curState = patternGraph.intro.first;
+    _.each(track.analysis.bars, function(bar, i) {
+        nextStateName = getNextState(curState);
+        console.log('next state is', nextStateName);
+        curState = patternGraph.intro[nextStateName];
+        _.each(curState.patterns, function(pattern) {
+            postPatternForBar(bar, pattern);
+        });
+    });
+}
+
+function songPostProcess() {
+    dogQueue.sort(function(a,b) {
+        return a.time - b.time;
+    });
+}
+
+function getNextState(state) {
+    var sum = 0;
+    _.each(state.next, function(next) {
+        sum += next.prob;
+    });
+
+    var choice = _.random(sum);
+
+    sum = 0;
+    for (var i = 0; i < state.next.length; i++) {
+        var next = state.next[i];
+        sum += next.prob;
+        if (choice <= sum) {
+            return next.next;
+        }
+    }
+    console.log('whoops');
+    return null;
+}
+
+
+function postPatternForBar(bar, pattern) {
+    // quick hack ... just use duration
+    var dur = bar.duration / pattern.length;
+    for (var i = 0; i < pattern.length; i++) {
+        if (pattern[i] !== '.') {
+            var key = pattern[i];
+            var vq = null;
+            if ((key >= '0' && key <= '9') || key === 'a' || key === 'b') {
+                vq = sqk(key)
+            } else {
+                vq = oneShots[key];
+            }
+            dogPost(bar.start + i * dur, vq);
+        }
+    }
+}
 
 function sqk(key) {
     var idx = parseInt(key, 16)
-    return sqk(idx);
+    return sqi(idx);
 }
 
 function sqi(idx) {
     return curScale.quanta[idx];
-}
-
-function buildSongFromAnalysis(track) {
-    var segments = track.analysis.segments;
-    for (var i = 0; i < segments.length; i++) {
-        var segment = segments[i];
-    }
-
-    var yip = oneShots['y'];
-    _.each(track.analysis.beats, function(beat, i) {
-        //console.log('beat', beat);
-        dogPost(beat.start, yip);
-    });
-
-    var grunt = oneShots['g'];
-    _.each(track.analysis.bars, function(bar, i) {
-        //console.log('beat', beat);
-        //dogPost(bar.start, grunt);
-    });
-
-    _.each(track.analysis.bars, function(tatum, i) {
-        //console.log('beat', beat);
-        dogPost(tatum.start, sqi(tatum.which %12));
-    });
-
-    dogQueue.sort(function(a,b) {
-        return a.time - b.time;
-    });
 }
 
 
@@ -246,6 +277,7 @@ function trackReady(t) {
     fullAudioVolume = volume;
     setVolume();
     buildSongFromAnalysis(t);
+    songPostProcess();
 }
 
 function setVolume() {
@@ -293,7 +325,7 @@ function loadScaleSample(sound, buffer) {
     for (var i = 0; i < sound.notes; i++) {
         var newQ = {
             start:start + sound.offset,
-            duration: sound.length - sound.offset,
+            duration: sound.duration,
             track: {
                 buffer:buffer,
             },
