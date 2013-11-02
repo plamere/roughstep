@@ -51,7 +51,6 @@
        </div>
        <div id="controls">
           <button id="go" class="btn btn-info"><i id='go-inner' class="icon-play"></i></button>
-           <span id="which-bar"> </span>
 <span id='tweet-span'> 
     <a href="https://twitter.com/share" id='tweet' class="twitter-share-button" data-lang="en" data-count='none'>Tweet</a>
     <script>!function(d,s,id){var
@@ -65,6 +64,7 @@
 
 <div id="legend" class="hero span12">
 Unmuzzle your music
+           <span id="which-bar"> </span>
 </div>
 
 </body>
@@ -108,12 +108,14 @@ function buildSongFromAnalysis(track) {
     });
     var curState = patternGraph.intro.first;
     _.each(track.analysis.bars, function(bar, i) {
-        nextStateName = getNextState(curState);
-        //console.log(bar.which, curState, '-->', nextStateName);
-        curState = patternGraph.intro[nextStateName];
-        _.each(curState.patterns, function(pattern) {
-            postPatternForBar(bar, pattern);
-        });
+        if (bar.confidence >= .00) {
+            nextStateName = getNextState(curState);
+            //console.log(bar.which, curState, '-->', nextStateName);
+            curState = patternGraph.intro[nextStateName];
+            _.each(curState.patterns, function(pattern) {
+                postPatternForBar(bar, pattern);
+            });
+        }
     });
 
     var loudest = findLoudestBars(track, 20);

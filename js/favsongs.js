@@ -23,6 +23,7 @@ var favSongs = [
         "title": "Madness", 
         "visits": 62
     }, 
+    /*
     {
         "artist": "Daft Punk", 
         "id": "TRSRSLI13451D2B044", 
@@ -42,15 +43,46 @@ var favSongs = [
         "visits": 25
     }, 
     {
-        "artist": "The Postal Service", 
-        "id": "TRBXFDO13B52FCCD0B", 
-        "title": "Such Great Heights", 
-        "visits": 23
-    }, 
-    {
         "artist": "Hans Zimmer", 
         "id": "TRUTVSC13B550C9BCA", 
         "title": "Time", 
         "visits": 22
     } 
+    */
+    {
+        "artist": "Guns N' Roses", 
+        "id": "TRCKOTU134375341A1", 
+        "title": "Sweet Child O' Mine", 
+        "visits": 22
+    }, 
+    {
+        "artist": "Avicii", 
+        "id": "TRSTTLI13E388CBE75", 
+        "title": "Levels", 
+        "visits": 22
+    }, 
+    {
+        "artist": "Ylvis", 
+        "id": "TRRBBTM14216D21A67", 
+        "title": "The Fox (what does the fox say?)", 
+        "visits": 22
+    }, 
+    {
+        "artist": "Macklemore & Ryan Lewis", 
+        "id": "TREVZYU13FFA7838DD", 
+        "title": "Thrift Shop (feat. Wanz)", 
+        "visits": 22
+    }, 
+    {
+        "artist": "Daft Punk", 
+        "id": "TRQQPBX142162DD22D", 
+        "title": "Get Lucky", 
+        "visits": 22
+    }, 
+    {
+        "artist": "The Postal Service", 
+        "id": "TRBXFDO13B52FCCD0B", 
+        "title": "Such Great Heights", 
+        "visits": 23
+    }, 
 ]
