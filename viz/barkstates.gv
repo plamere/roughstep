@@ -1,0 +1,76 @@
+digraph bark_state_machine {
+    rankdir=TD;
+    size="8,5"
+    node [shape=doublecircle]; first;
+    node [shape=box]; 
+    drop [label="The Drop: 
+howls grunts and yips"];
+    drop -> s3 [label="50"];
+    drop -> s1 [label="50"];
+    s3a [label="grunt/monster yip grunt yip"];
+    s3a -> s3 [label="100"];
+    predrop [label="Predrop: 
+grunts barks and yips"];
+    predrop -> drop [label="100"];
+    s3 [label="grunt yip grunt yip"];
+    s3 -> s3 [label="47"];
+    s3 -> s3a [label="4"];
+    s3 -> s1 [label="47"];
+    s2 [label="bark yip bark .. yip"];
+    s2 -> s1 [label="100"];
+    s1 [label="Steady state
+bark yip bark yip"];
+    s1 -> s1 [label="18"];
+    s1 -> s2 [label="18"];
+    s1 -> s3 [label="18"];
+    s1 -> s4 [label="18"];
+    s1 -> s1a [label="9"];
+    s1 -> s1b [label="9"];
+    s1 -> predrop [label="5"];
+    s0 [label="silence"];
+    s0 -> s0 [label="50"];
+    s0 -> s0b [label="25"];
+    s0 -> s0a [label="25"];
+    s4 [label=".. .. yip yip .. .. yip yip"];
+    s4 -> s4 [label="50"];
+    s4 -> s1 [label="50"];
+    s1b [label="woof/bark yip woof/bark yip"];
+    s1b -> s1b [label="25"];
+    s1b -> s1a [label="25"];
+    s1b -> s1 [label="25"];
+    s1b -> s1d [label="25"];
+    s1c [label="woof yip bark yip"];
+    s1c -> s1c [label="25"];
+    s1c -> s1a [label="25"];
+    s1c -> s1b [label="25"];
+    s1c -> s1d [label="25"];
+    s0a [label="warm up
+couple of grunts"];
+    s0a -> s0a [label="20"];
+    s0a -> s0b [label="20"];
+    s0a -> s0c [label="20"];
+    s0a -> s1 [label="40"];
+    s0b [label="single grunt"];
+    s0b -> s0a [label="33"];
+    s0b -> s0b [label="33"];
+    s0b -> s1 [label="33"];
+    s0c [label="bark and grunt"];
+    s0c -> s0c [label="71"];
+    s0c -> s0a [label="28"];
+    s1d [label="bark yip woof yip"];
+    s1d -> s1d [label="20"];
+    s1d -> s1c [label="20"];
+    s1d -> s1a [label="20"];
+    s1d -> s1b [label="20"];
+    s1d -> s1e [label="20"];
+    s1a [label="woof yip woof yip"];
+    s1a -> s1a [label="33"];
+    s1a -> s1b [label="33"];
+    s1a -> s1 [label="33"];
+    s1e [label="bark grunt woof grunt"];
+    s1e -> s1e [label="71"];
+    s1e -> s1d [label="28"];
+    first [label="first"];
+    first -> s0 [label="50"];
+    first -> s0a [label="50"];
+}
