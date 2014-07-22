@@ -523,7 +523,7 @@ function stateCallback(playState) {
 function trackReady(t) {
     curTrack = t;
     t.fixedTitle = getTitle(t.title, t.artist, t.info.url);
-    document.title = t.fixedTitle + '(roughstep)';
+    document.title = t.fixedTitle + '(dogstep)';
     var volume = interp(t.audio_summary.loudness, -12, -6, .4, 1);
     fullAudioVolume = volume;
     setVolume();
@@ -793,7 +793,7 @@ function tweetSetup(t) {
 
     $("#tweet-span").prepend(tweet);
     if (t) {
-        tweet.attr('data-text',  "A #roughstep version of " + t.fixedTitle);
+        tweet.attr('data-text',  "A #dogstep version of " + t.fixedTitle);
         tweet.attr('data-url', document.URL);
     } 
     // twitter can be troublesome. If it is not there, don't bother loading it

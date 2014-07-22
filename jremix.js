@@ -241,7 +241,7 @@ function createJRemixer(context, jquery) {
                     var duration = q.duration;
                     audioSource.buffer = q.track.buffer;
                     audioSource.connect(audioGain);
-                    audioSource.noteGrainOn(when + startTime, q.start, duration);
+                    audioSource.start(when + startTime, q.start, duration);
                     q.audioSource = audioSource;
                     return when + duration;
                 } else {
@@ -264,7 +264,7 @@ function createJRemixer(context, jquery) {
                     audioSource.buffer = q.track.buffer;
                     audioSource.connect(audioGain);
                     var tduration = q.track.audio_summary.duration - q.start;
-                    audioSource.noteGrainOn(startTime + start, q.start, tduration);
+                    audioSource.start(startTime + start, q.start, tduration);
                     if (curAudioSource) {
                         curAudioSource.noteOff(start);
                     }
@@ -281,7 +281,7 @@ function createJRemixer(context, jquery) {
                 var audioSource = context.createBufferSource();
                 audioSource.buffer = q.track.buffer;
                 audioSource.connect(audioGain);
-                audioSource.noteGrainOn(start, q.start, q.duration);
+                audioSource.start(start, q.start, q.duration);
                 return q.duration;
             }
 
@@ -371,8 +371,17 @@ function createJRemixer(context, jquery) {
             this.request = request;
 
             request.onload = function() {
+                /*
                 var buffer = context.createBuffer(request.response, false);
                 callback(true, buffer);
+                */
+
+                context.decodeAudioData(request.response, 
+                    function onSuccess(buffer) {
+                        callback(true, buffer);
+                      }, function onFailure() {
+                          callback(false, null);
+                    });
             }
 
             request.onerror = function(e) {
