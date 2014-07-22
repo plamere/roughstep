@@ -228,7 +228,7 @@ function createJRemixer(context, jquery) {
                     var audioSource = context.createBufferSource();
                     audioSource.buffer = q;
                     audioSource.connect(audioGain);
-                    audioSource.noteOn(when + startTime);
+                    audioSource.start(when + startTime);
                     return when;
                 } else if ($.isArray(q)) {
                     for (var i in q) {
@@ -266,7 +266,7 @@ function createJRemixer(context, jquery) {
                     var tduration = q.track.audio_summary.duration - q.start;
                     audioSource.start(startTime + start, q.start, tduration);
                     if (curAudioSource) {
-                        curAudioSource.noteOff(start);
+                        curAudioSource.stop(start);
                     }
                     curAudioSource = audioSource;
                 }
@@ -332,7 +332,7 @@ function createJRemixer(context, jquery) {
                 stop: function(q) {
                     if (q === undefined) {
                         if (curAudioSource) {
-                            curAudioSource.noteOff(0);
+                            curAudioSource.stop(0);
                             curAudioSource = null;
                         }
                         //audioGain.gain.value = 0;
@@ -340,7 +340,7 @@ function createJRemixer(context, jquery) {
                     } else {
                         if ('audioSource' in q) {
                             if (q.audioSource != null) {
-                                q.audioSource.noteOff(0);
+                                q.audioSource.stop(0);
                             }
                         }
                     }
